@@ -1,20 +1,19 @@
-<p align="center"><img src="https://demo.cachethq.io/img/cachet-logo.svg" width="50%"></p>
-
 <p align="center">
-<a href="https://styleci.io/repos/26730195/"><img src="https://styleci.io/repos/26730195/shield" alt="StyleCI"></a>
-<a href="https://travis-ci.org/CachetHQ/Cachet"><img src="https://img.shields.io/travis/CachetHQ/Cachet/2.4.svg?style=flat-square" alt="Build Status"></a>
-<a href="LICENSE"><img src="https://img.shields.io/badge/license-BSD3-brightgreen.svg?style=flat-square" alt="License"></a>
-<a href="http://translate.cachethq.io/project/cachet"><img src="https://d322cqt584bo4o.cloudfront.net/cachet/localized.svg" alt="Localisation"></a>
-<a href="https://github.com/CachetHQ/Cachet/releases"><img src="https://img.shields.io/github/release/cachethq/cachet.svg?style=flat-square" alt="Latest Stable Version"></a>
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://cachethq.io/assets/cachet-logo-dark.svg">
+      <img alt="Cachet Logo" src="https://cachethq.io/assets/cachet-logo-light.svg">
+    </picture>
 </p>
 
-Cachet is a beautiful and powerful open source status page system.
+Cachet, the open-source status page system.
 
-## Community
+## Cachet 3.x Announcement
 
-You can now [join our Slack community!](http://cachethq-slack.herokuapp.com)
+We are shifting our attention and resources to Cachet 3.x and will no longer be supporting the 2.x version.
 
-## Overview
+For more information on the Cachet rebuild and our plans for 3.x, you can read the announcement [here](https://github.com/CachetHQ/Cachet/discussions/4342).
+
+## Features
 
 - List your service components
 - Report incidents
@@ -28,10 +27,10 @@ You can now [join our Slack community!](http://cachethq-slack.herokuapp.com)
 
 ## Requirements
 
-- PHP 5.5.9+ or newer
-- HTTP server with PHP support (eg: Apache, Nginx, Caddy)
+- PHP 7.1.3 – 7.3
+- HTTP server with PHP support (e.g.: Apache, Nginx, Caddy)
 - [Composer](https://getcomposer.org)
-- A supported database: MySQL, PostgreSQL or SQLite
+- A supported database: MariaDB, MySQL, PostgreSQL or SQLite
 
 ## Installation, Upgrades and Documentation
 
@@ -39,26 +38,19 @@ You can find documentation at [https://docs.cachethq.io](https://docs.cachethq.i
 
 Here are some useful quick links:
 
-- [Installing Cachet](https://docs.cachethq.io/docs/installing-cachet)
-- [Getting started with Docker](https://docs.cachethq.io/docs/get-started-with-docker)
+- [Installing Cachet](https://docs.cachethq.io/installation/)
+- [Getting started with Docker](https://docs.cachethq.io/installation/docker)
 
-### Demo Account
+### Demo
 
-To test out the demo, you may login to the [Dashboard](https://demo.cachethq.io/dashboard) with the following:
+To test out the demo, you can log in to the [Cachet dashboard](https://demo.cachethq.io/dashboard) with the following credentials:
 
-- **Username:** `test` or `test@test.com`
+- **Username:** `test` or `test@example.com`
 - **Password:** `test123`
 
-> The demo resets every 30 minutes.
-
-## Translate Cachet
-
-If you'd like to contribute translations, please check out our [CrowdIn project](https://crowdin.com/project/cachet).
-
-## Professional Installation Service
-
-We offer a professional installation service. To find out more, email us at [support@alt-three.com](mailto:support@alt-three.com?Cachet%20Installation)
+> **Note**
+> The demo will automatically reset every 30 minutes.
 
 ## Security Vulnerabilities
 
-If you discover a security vulnerability within Cachet, please send an e-mail to us at support@alt-three.com. We handle all security vulnerabilities on a case-by-case basis.
+If you discover a security vulnerability within Cachet, please send an e-mail to [support@cachethq.io](mailto:support@cachethq.io?Cachet%20Security%20Vulnerability). All security vulnerabilities are reviewed on a case-by-case basis.

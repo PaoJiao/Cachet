@@ -12,7 +12,7 @@
 return [
     // Components
     'components' => [
-        'last_updated' => 'Dernière mise à jour :timestamp',
+        'last_updated' => 'Dernière mise-à-jour le :timestamp',
         'status'       => [
             0 => 'Inconnu',
             1 => 'Opérationnel',
@@ -21,22 +21,23 @@ return [
             4 => 'Panne majeure',
         ],
         'group' => [
-            'other' => 'Autres composants',
+            'other' => 'Autres services',
         ],
+        'select_all'   => 'Tout sélectionner',
+        'deselect_all' => 'Tout désélectionner',
     ],
 
     // Incidents
     'incidents' => [
-        'none'          => 'Aucun incident signalé',
-        'past'          => 'Incidents antérieurs',
-        'previous_week' => 'Semaine précédente',
-        'next_week'     => 'Semaine suivante',
-        'stickied'      => 'Incidents épinglés',
-        'scheduled'     => 'Maintenance Planifiée',
-        'scheduled_at'  => ', planifé à :timestamp',
-        'posted'        => 'Posté à :timestamp',
-        'status'        => [
-            1 => 'Enquête en cours',
+        'none'         => 'Aucun incident signalé',
+        'past'         => 'Incidents antérieurs',
+        'stickied'     => 'Incidents épinglés',
+        'scheduled'    => 'Maintenance planifiée',
+        'scheduled_at' => ', planifé le :timestamp',
+        'posted'       => 'Signalé :timestamp par :username',
+        'posted_at'    => 'Signalé :timestamp',
+        'status'       => [
+            1 => 'En cours d’investigation',
             2 => 'Identifié',
             3 => 'Sous surveillance',
             4 => 'Corrigé',
@@ -54,9 +55,9 @@ return [
 
     // Service Status
     'service' => [
-        'good'  => '[0,1] Système opérationnel|[2,Inf] Tous les systèmes sont opérationnels',
-        'bad'   => '[0,1] Le système rencontre actuellement des problèmes|[2,Inf] Certains systèmes rencontrent des problèmes',
-        'major' => '[0,1] Le service rencontre une panne majeure|[2,Inf] Certains systèmes rencontrent une panne majeure',
+        'good'  => 'Aucun incident signalé',
+        'bad'   => 'Incident en cours',
+        'major' => 'Incident majeur en cours',
     ],
 
     'api' => [
@@ -76,30 +77,37 @@ return [
 
     // Subscriber
     'subscriber' => [
-        'subscribe'   => 'Abonnez-vous pour obtenir les dernières mises à jour.',
-        'unsubscribe' => 'Unsubscribe at :link',
-        'button'      => 'S\'abonner',
-        'manage'      => [
-            'no_subscriptions' => 'Vous êtes actuellement abonné à toutes les mises à jour.',
-            'my_subscriptions' => 'Vous êtes actuellement abonné aux mises à jour suivantes.',
+        'subscribe'           => 'Être informé des nouveaux signalements d’incidents et changements de statut',
+        'unsubscribe'         => 'Se désabonner',
+        'button'              => 'S’abonner',
+        'manage_subscription' => 'Gérer l’abonnement',
+        'manage'              => [
+            'notifications'       => 'Notifications',
+            'notifications_for'   => 'Gérer les notifications pour',
+            'no_subscriptions'    => 'Vous êtes actuellement abonné à toutes les mises-à-jour.',
+            'update_subscription' => 'Mettre-à-jour l’abonnement',
+            'my_subscriptions'    => 'Vous êtes actuellement abonné aux mises-à-jour suivantes.',
+            'manage_at_link'      => 'Gérer vos abonnements à :link',
         ],
         'email' => [
-            'subscribe'          => 'S\'abonner aux notifications par email.',
-            'subscribed'         => 'Vous êtes abonné aux notifications par email, veuillez vérifier votre messagerie pour confirmer votre adresse.',
-            'verified'           => 'Votre abonnement aux notifications par email a été confirmé. Merci !',
-            'manage'             => 'Gérer votre abonnement',
-            'unsubscribe'        => 'Désinscription des mises à jour par courriel.',
-            'unsubscribed'       => 'Votre abonnement aux notifications par email a été annulé.',
-            'failure'            => 'Une erreur est survenue lors de l\'abonnement.',
-            'already-subscribed' => 'Impossible de s\'abonner avec l\'adresse e-mail :email car celle-ci est déjà abonnée.',
+            'manage_subscription' => 'Un courriel vous a été envoyé ; merci de cliquer sur le lien pour gérer votre abonnement',
+            'subscribe'           => 'S’abonner aux notifications par courriel.',
+            'subscribed'          => 'Vous êtes abonné aux notifications par courriel, veuillez vérifier votre messagerie pour confirmer votre adresse.',
+            'updated-subscribe'   => 'Vous avez mis-à-jour vos abonnements avec succès.',
+            'verified'            => 'Votre abonnement aux notifications par courriel a été confirmé. Merci !',
+            'manage'              => 'Gérer votre abonnement',
+            'unsubscribe'         => 'Se désabonner des mises à jour par courriel.',
+            'unsubscribed'        => 'Votre abonnement aux notifications par courriel a été annulé.',
+            'failure'             => 'Une erreur est survenue lors de l’abonnement.',
+            'already-subscribed'  => 'Impossible de s’abonner avec l’adresse mail :email car celle-ci est déjà abonnée.',
         ],
     ],
 
     'signup' => [
         'title'    => 'Inscription',
-        'username' => 'Nom d\'utilisateur',
-        'email'    => 'Adresse e-mail',
-        'password' => 'Mot de passe ',
+        'username' => 'Nom d’utilisateur',
+        'email'    => 'Adresse mail',
+        'password' => 'Mot de passe',
         'success'  => 'Votre compte a été créé.',
         'failure'  => 'Un problème est survenu lors de votre inscription.',
     ],
@@ -112,15 +120,24 @@ return [
     'modal' => [
         'close'     => 'Fermer',
         'subscribe' => [
-            'title'  => 'S\'abonner aux mises à jour du status du composant',
-            'body'   => 'Entrez votre adresse e-mail pour vous abonner aux mises à jour de ce composant. Si vous êtes déjà abonné, vous recevez déjà des notifications pour ce composant.',
-            'button' => 'S\'abonner',
+            'title'  => 'S’abonner aux mises-à-jour du statut du service',
+            'body'   => 'Entrez votre adresse mail pour vous abonner aux mises-à-jour de ce service. Si vous êtes déjà abonné, vous recevez déjà des notifications pour ce service.',
+            'button' => 'S’abonner',
+        ],
+    ],
+
+    // Meta descriptions
+    'meta' => [
+        'description' => [
+            'incident'  => 'Détails et mises-à-jour sur l’incident :name qui a eu lieu le :date',
+            'schedule'  => 'Détails sur la période de maintenance planifiée :name débutant le :startDate',
+            'subscribe' => 'S’abonner à :app afin de recevoir les mises-à-jour des incidents et des périodes de maintenance planifiée',
+            'overview'  => 'Restez à jour avec les dernières mises-à-jour de :app.',
         ],
     ],
 
     // Other
     'home'            => 'Accueil',
-    'description'     => 'Restez à jour avec les dernières mises à jour de :app.',
     'powered_by'      => 'Propulsé par <a href="https://cachethq.io">Cachet</a>.',
     'timezone'        => 'Les heures sont affichées avec le fuseau horaire :timezone.',
     'about_this_site' => 'À propos du site',

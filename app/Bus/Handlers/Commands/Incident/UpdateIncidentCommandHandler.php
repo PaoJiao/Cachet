@@ -15,13 +15,12 @@ use CachetHQ\Cachet\Bus\Commands\Component\UpdateComponentCommand;
 use CachetHQ\Cachet\Bus\Commands\Incident\UpdateIncidentCommand;
 use CachetHQ\Cachet\Bus\Events\Incident\IncidentWasUpdatedEvent;
 use CachetHQ\Cachet\Bus\Exceptions\Incident\InvalidIncidentTimestampException;
+use CachetHQ\Cachet\Bus\Handlers\Traits\StoresMeta;
 use CachetHQ\Cachet\Models\Component;
 use CachetHQ\Cachet\Models\Incident;
 use CachetHQ\Cachet\Models\IncidentTemplate;
 use CachetHQ\Cachet\Services\Dates\DateFactory;
 use Illuminate\Contracts\Auth\Guard;
-use Twig_Environment;
-use Twig_Loader_Array;
 
 /**
  * This is the update incident command handler.
@@ -30,6 +29,8 @@ use Twig_Loader_Array;
  */
 class UpdateIncidentCommandHandler
 {
+    use StoresMeta;
+
     /**
      * The authentication guard instance.
      *
@@ -45,6 +46,11 @@ class UpdateIncidentCommandHandler
     protected $dates;
 
     /**
+     * Twig configuration array.
+     */
+    protected $twigConfig;
+
+    /**
      * Create a new update incident command handler instance.
      *
      * @param \Illuminate\Contracts\Auth\Guard            $auth
@@ -56,6 +62,8 @@ class UpdateIncidentCommandHandler
     {
         $this->auth = $auth;
         $this->dates = $dates;
+
+        $this->twigConfig = $twigConfig = config('cachet.twig');
     }
 
     /**
@@ -86,9 +94,14 @@ class UpdateIncidentCommandHandler
         // Rather than making lots of updates, just fill and save.
         $incident->save();
 
+        // Store any meta?
+        if ($meta = $command->meta) {
+            $this->storeMeta($command->meta, 'incidents', $incident->id);
+        }
+
         // Update the component.
         if ($component = Component::find($command->component_id)) {
-            dispatch(new UpdateComponentCommand(
+            execute(new UpdateComponentCommand(
                 Component::find($command->component_id),
                 null,
                 null,
@@ -98,7 +111,8 @@ class UpdateIncidentCommandHandler
                 null,
                 null,
                 null,
-                false
+                null,
+                true // Silent mode
             ));
         }
 
@@ -132,6 +146,32 @@ class UpdateIncidentCommandHandler
         });
     }
 
+    protected function sandboxedTwigTemplateData(string $templateData)
+    {
+        $policy = new \Twig\Sandbox\SecurityPolicy(
+            $this->twigConfig['tags'],
+            $this->twigConfig['filters'],
+            $this->twigConfig['methods'],
+            $this->twigConfig['props'],
+            $this->twigConfig['functions']
+        );
+        $sandbox = new \Twig\Extension\SandboxExtension($policy);
+
+        $templateBasicLoader = new \Twig\Loader\ArrayLoader([
+            'firstStageLoader' => $templateData,
+        ]);
+
+        $sandBoxBasicLoader = new \Twig\Loader\ArrayLoader([
+            'secondStageLoader' => '{% sandbox %}{% include "firstStageLoader" %} {% endsandbox %}',
+        ]);
+
+        $hardenedLoader = new \Twig\Loader\ChainLoader([$templateBasicLoader, $sandBoxBasicLoader]);
+        $twig = new \Twig\Environment($hardenedLoader);
+        $twig->addExtension($sandbox);
+
+        return $twig;
+    }
+
     /**
      * Compiles an incident template into an incident message.
      *
@@ -142,8 +182,7 @@ class UpdateIncidentCommandHandler
      */
     protected function parseTemplate(IncidentTemplate $template, UpdateIncidentCommand $command)
     {
-        $env = new Twig_Environment(new Twig_Loader_Array([]));
-        $template = $env->createTemplate($template->template);
+        $template = $this->sandboxedTwigTemplateData($template->template);
 
         $vars = array_merge($command->template_vars, [
             'incident' => [
@@ -159,6 +198,6 @@ class UpdateIncidentCommandHandler
             ],
         ]);
 
-        return $template->render($vars);
+        return $template->render('secondStageLoader', $vars);
     }
 }

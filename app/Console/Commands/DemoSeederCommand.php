@@ -56,14 +56,14 @@ class DemoSeederCommand extends Command
     /**
      * The settings repository.
      *
-     * @var \CachetHQ\Cache\Settings\Repository
+     * @var \CachetHQ\Cachet\Settings\Repository
      */
     protected $settings;
 
     /**
      * Create a new demo seeder command instance.
      *
-     * @param \CachetHQ\Cache\Settings\Repository $settings
+     * @param \CachetHQ\Cachet\Settings\Repository $settings
      *
      * @return void
      */
@@ -79,12 +79,13 @@ class DemoSeederCommand extends Command
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         if (!$this->confirmToProceed()) {
             return;
         }
 
+        $this->seedUsers();
         $this->seedActions();
         $this->seedComponentGroups();
         $this->seedComponents();
@@ -95,7 +96,6 @@ class DemoSeederCommand extends Command
         $this->seedSchedules();
         $this->seedSettings();
         $this->seedSubscribers();
-        $this->seedUsers();
 
         $this->info('Database seeded with demo data successfully!');
     }
@@ -124,7 +124,7 @@ class DemoSeederCommand extends Command
                 'collapsed' => 0,
                 'visible'   => ComponentGroup::VISIBLE_AUTHENTICATED,
             ], [
-                'name'      => 'Alt Three',
+                'name'      => 'Services',
                 'order'     => 2,
                 'collapsed' => 1,
                 'visible'   => ComponentGroup::VISIBLE_GUEST,
@@ -168,26 +168,26 @@ class DemoSeederCommand extends Command
                 'group_id'    => 1,
                 'link'        => 'https://cachethq.io',
             ], [
-                'name'        => 'Blog',
-                'description' => 'The Alt Three Blog.',
+                'name'        => 'Laravel Artisan Cheatsheet',
+                'description' => 'A searchable, bookmarkable cheatsheet for Laravel\'s Artisan commands.',
                 'status'      => 1,
                 'order'       => 0,
                 'group_id'    => 2,
-                'link'        => 'https://blog.alt-three.com',
+                'link'        => 'https://artisan.page',
             ], [
-                'name'        => 'StyleCI',
-                'description' => 'The PHP Coding Style Service.',
+                'name'        => 'Checkmango',
+                'description' => 'The Full-Stack A/B Testing Platform',
                 'status'      => 1,
                 'order'       => 1,
                 'group_id'    => 2,
-                'link'        => 'https://styleci.io',
+                'link'        => 'https://checkmango.com',
             ], [
                 'name'        => 'GitHub',
                 'description' => '',
                 'status'      => 1,
                 'order'       => 0,
                 'group_id'    => 0,
-                'link'        => 'https://github.com/CachetHQ/Cachet',
+                'link'        => 'https://github.com/cachethq/cachet',
             ],
         ];
 
@@ -223,6 +223,7 @@ EINCIDENT;
                 'component_id' => 0,
                 'visible'      => 1,
                 'stickied'     => false,
+                'user_id'      => 1,
                 'occurred_at'  => Carbon::now(),
             ],
             [
@@ -232,6 +233,7 @@ EINCIDENT;
                 'component_id' => 0,
                 'visible'      => 1,
                 'stickied'     => false,
+                'user_id'      => 1,
                 'occurred_at'  => Carbon::now(),
             ],
         ];
@@ -394,20 +396,20 @@ EINCIDENT;
                 'key'   => 'app_incident_days',
                 'value' => '7',
             ], [
-                'key'   => 'app_analytics',
-                'value' => 'UA-58442674-3',
-            ], [
-                'key'   => 'app_analytics_gs',
-                'value' => 'GSN-712462-P',
+                'key'   => 'app_refresh_rate',
+                'value' => '0',
             ], [
                 'key'   => 'display_graphs',
                 'value' => '1',
             ], [
                 'key'   => 'app_about',
-                'value' => 'This is the demo instance of [Cachet](https://cachethq.io?ref=demo). The open source status page system, for everyone. An [Alt Three](https://alt-three.com) product.',
+                'value' => 'This is the demo instance of [Cachet](https://cachethq.io?ref=demo). The open-source status page system, for everyone. 3.x is coming soon! [Read the announcement](https://github.com/cachethq/cachet/discussions/4342).',
             ], [
                 'key'   => 'enable_subscribers',
                 'value' => '0',
+            ], [
+                'key'   => 'header',
+                'value' => '<script src="https://cdn.usefathom.com/script.js" data-site="NQKCLYJJ" defer></script>',
             ],
         ];
 
@@ -439,7 +441,7 @@ EINCIDENT;
             [
                 'username' => 'test',
                 'password' => 'test123',
-                'email'    => 'test@test.com',
+                'email'    => 'test@example.com',
                 'level'    => User::LEVEL_ADMIN,
                 'api_key'  => '9yMHsdioQosnyVK4iCVR',
             ],

@@ -15,14 +15,16 @@ use CachetHQ\Cachet\Bus\Commands\Component\UpdateComponentCommand;
 use CachetHQ\Cachet\Bus\Commands\Incident\CreateIncidentCommand;
 use CachetHQ\Cachet\Bus\Events\Incident\IncidentWasCreatedEvent;
 use CachetHQ\Cachet\Bus\Exceptions\Incident\InvalidIncidentTimestampException;
+use CachetHQ\Cachet\Bus\Handlers\Traits\StoresMeta;
 use CachetHQ\Cachet\Models\Component;
 use CachetHQ\Cachet\Models\Incident;
 use CachetHQ\Cachet\Models\IncidentTemplate;
+use CachetHQ\Cachet\Models\Meta;
 use CachetHQ\Cachet\Services\Dates\DateFactory;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Guard;
-use Twig_Environment;
-use Twig_Loader_Array;
+use Twig\Environment as Twig_Environment;
+use Twig\Loader\ArrayLoader as Twig_Loader_Array;
 
 /**
  * This is the create incident command handler.
@@ -31,6 +33,8 @@ use Twig_Loader_Array;
  */
 class CreateIncidentCommandHandler
 {
+    use StoresMeta;
+
     /**
      * The authentication guard instance.
      *
@@ -45,6 +49,8 @@ class CreateIncidentCommandHandler
      */
     protected $dates;
 
+    protected $twigConfig;
+
     /**
      * Create a new create incident command handler instance.
      *
@@ -57,6 +63,8 @@ class CreateIncidentCommandHandler
     {
         $this->auth = $auth;
         $this->dates = $dates;
+
+        $this->twigConfig = config('cachet.twig');
     }
 
     /**
@@ -69,6 +77,7 @@ class CreateIncidentCommandHandler
     public function handle(CreateIncidentCommand $command)
     {
         $data = [
+            'user_id'  => $this->auth->user()->id,
             'name'     => $command->name,
             'status'   => $command->status,
             'visible'  => $command->visible,
@@ -100,9 +109,14 @@ class CreateIncidentCommandHandler
         // Create the incident
         $incident = Incident::create($data);
 
+        // Store any meta?
+        if ($meta = $command->meta) {
+            $this->storeMeta($command->meta, 'incidents', $incident->id);
+        }
+
         // Update the component.
         if ($component = Component::find($command->component_id)) {
-            dispatch(new UpdateComponentCommand(
+            execute(new UpdateComponentCommand(
                 Component::find($command->component_id),
                 null,
                 null,
@@ -112,13 +126,45 @@ class CreateIncidentCommandHandler
                 null,
                 null,
                 null,
-                false
+                null,
+                true  // Silent mode
             ));
         }
 
         event(new IncidentWasCreatedEvent($this->auth->user(), $incident, (bool) $command->notify));
 
         return $incident;
+    }
+
+    protected function sandboxedTwigTemplateData(string $templateData)
+    {
+        if (!$templateData) {
+            return '';
+        }
+
+        $policy = new \Twig\Sandbox\SecurityPolicy(
+            $this->twigConfig['tags'],
+            $this->twigConfig['filters'],
+            $this->twigConfig['methods'],
+            $this->twigConfig['props'],
+            $this->twigConfig['functions']
+        );
+
+        $sandbox = new \Twig\Extension\SandboxExtension($policy);
+
+        $templateBasicLoader = new Twig_Loader_Array([
+            'firstStageLoader' => $templateData,
+        ]);
+
+        $sandBoxBasicLoader = new Twig_Loader_Array([
+            'secondStageLoader' => '{% sandbox %}{% include "firstStageLoader" %} {% endsandbox %}',
+        ]);
+
+        $hardenedLoader = new \Twig\Loader\ChainLoader([$templateBasicLoader, $sandBoxBasicLoader]);
+        $twig = new Twig_Environment($hardenedLoader);
+        $twig->addExtension($sandbox);
+
+        return $twig;
     }
 
     /**
@@ -131,8 +177,7 @@ class CreateIncidentCommandHandler
      */
     protected function parseTemplate(IncidentTemplate $template, CreateIncidentCommand $command)
     {
-        $env = new Twig_Environment(new Twig_Loader_Array([]));
-        $template = $env->createTemplate($template->template);
+        $template = $this->sandboxedTwigTemplateData($template->template);
 
         $vars = array_merge($command->template_vars, [
             'incident' => [
@@ -148,6 +193,6 @@ class CreateIncidentCommandHandler
             ],
         ]);
 
-        return $template->render($vars);
+        return $template->render('secondStageLoader', $vars);
     }
 }
